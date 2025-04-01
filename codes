@@ -1,0 +1,53 @@
+## --------------------------------------------------------------------------------- MPLuS codes ----------------------------------------------------------------------------------------------
+	DATA:
+	 File is '/Users/s4626133/Dropbox/2_Postdoc work/3_NDSHS/5_Dataset/all.csv';
+	VARIABLE: 
+	 names  = wgt str id smk vp ely nic prs cut D4_1 D4_2 D4_3 D4_4 D4_5 D4_7 D4_9 D4_10;
+	 usevariables = smk vp ely nic prs cut D4_1 D4_2 D4_3 D4_4 D4_5 D4_7 D4_9 D4_10;
+	 categorical = smk vp ely nic prs cut D4_1 D4_2 D4_3 D4_4 D4_5 D4_7 D4_9 D4_10;
+	 classes  = c(6);
+	 weight = wgt;
+	 idvariable = id;
+	 missing = all(999);
+	ANALYSIS:
+	 Type = mixture;
+	 Starts = 1500 50;
+	Plot:
+	
+	model:
+	 %overall%
+	output:
+	 tech11 tech10;
+	savedata:
+	 file is output.txt;
+	 save is bchweights cprob;
+	 format is free;
+
+## --------------------------------------------------------------------------------- STATA codes ----------------------------------------------------------------------------------------------
+
+mi set flong
+
+mi register imputed edustatus indigeneity maritalstatus_n k10rank_n hhincome_level agegroup cald_flag_n rcntanyill_n gender_n employment_n audit_cat
+
+*Impute 20 times
+mi impute chain (mlogit) edustatus indigeneity maritalstatus_n k10rank_n hhincome_level agegroup cald_flag_n rcntanyill_n gender_n employment_n audit_cat, add(20) rseed(12345) noisily augment
+ 
+mi reshape long bchw, i(hh_id) j(bchmember)
+
+mi svyset _n[iweight = bchw]
+
+*0.05/12 = 0.004167
+set level 99.58 
+
+char k10rank_n[omit]1
+char hhincome_level[omit]1 
+char agegroup[omit]4
+char cald_flag_n[omit]2
+char edustatus[omit]5
+char seifa[omit]5
+char rcntanyill_n[omit]2
+char gender_n[omit]2
+char indigeneity[omit]2
+char employment_n[omit]2
+char audit_cat[omit]1
+char maritalstatus_n[omit]3
